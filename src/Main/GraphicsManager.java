@@ -62,13 +62,14 @@ public class GraphicsManager implements Runnable {
 
     public void update() {
         for (int i = sprites.size() - 1; i >= 0; i--) {
-            if (!sprites.get(i).state) sprites.remove(i);
+            if (!sprites.get(i).state)
+                sprites.remove(i);
         }
     }
 
     @Override
     public void run() {
-        while(running) {
+        while (running) {
             if (!queue.isEmpty()) {
                 try {
                     addSprite(queue.take());
@@ -78,7 +79,12 @@ public class GraphicsManager implements Runnable {
                 }
             }
 
-            //draw g
+            // prevent CheerpJ from blocking the main thread
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 

@@ -21,9 +21,9 @@ public class Game {
 
     private GameStateManager gsm;
 
-    Game(AudioManager _audioManager, GraphicsManager _graphicsManager) {
+    Game(AudioManager _audioManager, GraphicsManager _graphicsManager, AssetManager _assetManager) {
 
-        assetManager = new AssetManager();
+        assetManager = _assetManager;
         audioManager = _audioManager;
         graphicsManager = _graphicsManager;
 
@@ -36,10 +36,11 @@ public class Game {
             }
         });
 
-        //Create a manager for handling key and mouse inputs
-        inputManager = new InputManager(window.canvas);
+        // Create a manager for handling key and mouse inputs
+        inputManager = new InputManager(window.getInputTarget());
 
-        //Create a manager for handling the different game states e.g. intro, play, gameOver
+        // Create a manager for handling the different game states e.g. intro, play,
+        // gameOver
         gsm = new GameStateManager(assetManager, audioManager, graphicsManager, window);
 
     }
@@ -56,7 +57,7 @@ public class Game {
             previous = current;
             lag += elapsed;
 
-            //UPDATE
+            // UPDATE
             if (lag >= MS_PER_UPDATE) {
                 gsm.update(elapsed / MS_PER_UPDATE);
 
@@ -65,33 +66,35 @@ public class Game {
                 lag -= MS_PER_UPDATE;
             }
 
-            //RENDER
+            // RENDER
             window.render(gsm);
+
+            // Thread.yield();
         }
 
-//        int FPS = 60;
-//        long fpsWait = (long) (1000 / FPS);
-//        long renderTime = 0;
-//        while (gsm.running) {
-//
-//            long renderStart = System.nanoTime();
-//
-//            // UPDATE
-//            gsm.update(renderTime);
-//
-//            // RENDER
-//            window.render(gsm);
-//
-//            // fps limiting
-//            renderTime = (System.nanoTime() - renderStart) / 1000000;
-//            try {
-//                Thread.sleep(Math.max(0, fpsWait - renderTime));
-//            } catch (InterruptedException e) {
-//                Thread.interrupted();
-//                break;
-//            }
-//            renderTime = (System.nanoTime() - renderStart) / 1000000;
-//        }
+        // int FPS = 60;
+        // long fpsWait = (long) (1000 / FPS);
+        // long renderTime = 0;
+        // while (gsm.running) {
+        //
+        // long renderStart = System.nanoTime();
+        //
+        // // UPDATE
+        // gsm.update(renderTime);
+        //
+        // // RENDER
+        // window.render(gsm);
+        //
+        // // fps limiting
+        // renderTime = (System.nanoTime() - renderStart) / 1000000;
+        // try {
+        // Thread.sleep(Math.max(0, fpsWait - renderTime));
+        // } catch (InterruptedException e) {
+        // Thread.interrupted();
+        // break;
+        // }
+        // renderTime = (System.nanoTime() - renderStart) / 1000000;
+        // }
 
         exit();
 

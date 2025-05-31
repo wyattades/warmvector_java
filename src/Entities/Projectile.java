@@ -3,7 +3,6 @@ package Entities;
 import Entities.Player.Player;
 import GameState.GameStateManager;
 import Util.MyMath;
-import javafx.scene.media.AudioClip;
 
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
@@ -18,17 +17,18 @@ public class Projectile extends Entity {
     private double lastX, lastY;
     private double accel;
     public double explodeRadius, damage;
-    public AudioClip hitSound;
+    public String hitSound;
 
     public Player shooter;
 
     protected Projectile(GameStateManager _gsm, Player _shooter) {
 
-        super(_gsm, _shooter.x, _shooter.y, _shooter.orient + MyMath.random(-_shooter.weapon.spread * 0.5, _shooter.weapon.spread * 0.5));
+        super(_gsm, _shooter.x, _shooter.y,
+                _shooter.orient + MyMath.random(-_shooter.weapon.spread * 0.5, _shooter.weapon.spread * 0.5));
 
         shooter = _shooter;
 
-        sprite = (BufferedImage)gsm.assetManager.getAsset(_shooter.weapon.bulletImage);
+        sprite = (BufferedImage) gsm.assetManager.getAsset(_shooter.weapon.bulletImage);
         setBounds(sprite.getWidth(), sprite.getHeight());
 
         setVelocity(_shooter.weapon.i_speed);

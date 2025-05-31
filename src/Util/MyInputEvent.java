@@ -6,8 +6,7 @@ package Util;
  */
 public class MyInputEvent {
 
-    public static final int
-            MOUSE_UP = 0,
+    public static final int MOUSE_UP = 0,
             MOUSE_DOWN = 1,
             KEY_UP = 2,
             KEY_DOWN = 3,
@@ -24,6 +23,13 @@ public class MyInputEvent {
         type = _type;
         x = _x;
         y = _y;
+    }
+
+    public MyInputEvent(int _type, int _x, int _y, int _code) {
+        type = _type;
+        x = _x;
+        y = _y;
+        code = _code;
     }
 
 }

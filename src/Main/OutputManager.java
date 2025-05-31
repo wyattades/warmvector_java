@@ -41,34 +41,39 @@ public class OutputManager {
         saves = new HashMap<>();
         saves.put("level", 1);
 
-        // Get user's default directory
-        JFileChooser fr = new JFileChooser();
-        FileSystemView fw = fr.getFileSystemView();
-        userPath = fw.getDefaultDirectory().getPath() + "/My Games/WarmVector/";
 
-        File userDirectory = new File(userPath);
-        userDirectory.mkdirs();
+        if (!Main.CHEERPJ) {
+            // Get user's default directory
+            JFileChooser fr = new JFileChooser();
+            FileSystemView fw = fr.getFileSystemView();
+            userPath = fw.getDefaultDirectory().getPath() + "/My Games/WarmVector/";
 
-        // Make sure log file exists
-        File logFile = new File(userPath + "log.txt");
-        if (!logFile.exists()) {
-            try {
-                logFile.createNewFile();
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(null,
-                        "Failed to create log file: ~/My Games/WarmVector/log.txt\n" + e.toString(),
-                        "ERROR",
-                        JOptionPane.ERROR_MESSAGE);
-            }
+            File userDirectory = new File(userPath);
+            userDirectory.mkdirs();
+        } else {
+            userPath = "/files/";
         }
 
-        // Set program output to print to log
-        try {
-            PrintStream out = new PrintStream(new FileOutputStream(userPath + "log.txt", true));
-            System.setOut(out);
-            System.setErr(out);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        // Set up logging to file log.txt
+        if (!Main.CHEERPJ) {
+            // Make sure log file exists
+            File logFile = new File(userPath + "log.txt");
+            if (!logFile.exists()) {
+                try {
+                    logFile.createNewFile();
+                } catch (IOException e) {
+                    fatalAlert("Failed to create log file: " + userPath + "log.txt\n" + e.toString());
+                }
+            }
+
+            // Set program output to print to log
+            try {
+                PrintStream out = new PrintStream(new FileOutputStream(userPath + "log.txt", true));
+                System.setOut(out);
+                System.setErr(out);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         }
 
 
@@ -185,10 +190,12 @@ public class OutputManager {
     }
 
     public static void fatalAlert(String msg) {
-        JOptionPane.showMessageDialog(null, msg,
-                "Error", JOptionPane.ERROR_MESSAGE);
-        
+        if (Main.CHEERPJ) {
+            System.err.println("WARMVECTOR FATAL ALERT: " + msg);
+        } else {
+            JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
         System.exit(1);
     }
-
 }

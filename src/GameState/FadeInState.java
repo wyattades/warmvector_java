@@ -3,7 +3,6 @@ package GameState;
 import Main.OutputManager;
 import Main.Window;
 import Util.MyInputEvent;
-import javafx.scene.media.Media;
 
 import java.awt.*;
 
@@ -27,22 +26,21 @@ public class FadeInState extends GameState {
         int musicLevel = OutputManager.getSetting("level") % 3;
         backgroundMusic = "background" + musicLevel + ".mp3";
 
-        gsm.assetManager.loadAssets(new String[]{backgroundMusic});
+        gsm.assetManager.loadAssets(new String[] { backgroundMusic });
     }
 
     public void init() {
-        gsm.audioManager.playSong((Media)gsm.assetManager.getAsset(backgroundMusic), backgroundMusic);
-
+        gsm.audioManager.playSong(backgroundMusic);
         opacity = 255;
-        gsm.cursor.setMouse((int)(Main.Window.WIDTH * 0.5 + 70), (int)(Window.HEIGHT * 0.5));
+        gsm.cursor.setMouse((int) (Main.Window.WIDTH * 0.5 + 70), (int) (Window.HEIGHT * 0.5));
     }
 
     public void unload() {
-        gsm.cursor.setMouse((int)(Window.WIDTH * 0.5) + 70, (int)(Window.HEIGHT * 0.5));
+        gsm.cursor.setMouse((int) (Window.WIDTH * 0.5) + 70, (int) (Window.HEIGHT * 0.5));
     }
 
     public void draw(Graphics2D g) {
-        g.setColor(new Color(0, 0, 0, (int)Math.max(0.0, opacity)));
+        g.setColor(new Color(0, 0, 0, (int) Math.max(0.0, opacity)));
         g.fillRect(0, 0, Window.WIDTH, Window.HEIGHT);
     }
 
@@ -54,6 +52,7 @@ public class FadeInState extends GameState {
 
     }
 
-    public void inputHandle(MyInputEvent event) {}
+    public void inputHandle(MyInputEvent event) {
+    }
 
 }

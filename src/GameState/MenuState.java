@@ -18,8 +18,7 @@ import java.util.ArrayList;
  */
 public abstract class MenuState extends GameState {
 
-    protected static final int
-            MENU_WIDTH = (int) (480.0 * Window.SCALE),
+    protected static final int MENU_WIDTH = (int) (480.0 * Window.SCALE),
             BORDER_DIST = (int) (50.0 * Window.SCALE),
             RIGHT_ALIGN_X = Main.Window.WIDTH - BORDER_DIST,
             TEXT_HEIGHT = (int) (30.0 * Window.SCALE),
@@ -39,6 +38,7 @@ public abstract class MenuState extends GameState {
         OPTIONS,
         QUIT
     }
+
     protected CurrentPage currentPage;
 
     private int startY;
@@ -121,11 +121,11 @@ public abstract class MenuState extends GameState {
             case OPTIONS:
                 addButton("BACK", ButtonUI.ButtonType.BACK);
 
-                addSlider("Fix Bugs", "fix_bugs", new String[]{"Off", "On"});
-                addSlider("Cave Mode", "cave_mode", new String[]{"Off", "On"});
-                addSlider("Quality", "quality", new String[]{"Good", "Great"});
-                addSlider("Music Level", "music_volume", new String[]{"0", "25", "50", "75", "100"});
-                addSlider("SFX Level", "sfx_volume", new String[]{"0", "25", "50", "75", "100"});
+                addSlider("Fix Bugs", "fix_bugs", new String[] { "Off", "On" });
+                addSlider("Cave Mode", "cave_mode", new String[] { "Off", "On" });
+                addSlider("Quality", "quality", new String[] { "Good", "Great" });
+                addSlider("Music Level", "music_volume", new String[] { "0", "25", "50", "75", "100" });
+                addSlider("SFX Level", "sfx_volume", new String[] { "0", "25", "50", "75", "100" });
                 break;
         }
     }
@@ -145,7 +145,8 @@ public abstract class MenuState extends GameState {
     }
 
     protected void addSlider(String text, String name, String[] options) {
-        sliders.add(new SliderUI(RIGHT_ALIGN_X, drawY - DISPLAY_DIST, text, name, options, OutputManager.getSetting(name)));
+        sliders.add(
+                new SliderUI(RIGHT_ALIGN_X, drawY - DISPLAY_DIST, text, name, options, OutputManager.getSetting(name)));
         addLineBreak();
     }
 
@@ -214,7 +215,7 @@ public abstract class MenuState extends GameState {
 
     public void inputHandle(MyInputEvent event) {
 
-        switch(event.type) {
+        switch (event.type) {
             case MyInputEvent.MOUSE_MOVE:
 
                 gsm.cursor.setPosition(event.x, event.y);
@@ -225,6 +226,8 @@ public abstract class MenuState extends GameState {
 
                 break;
             case MyInputEvent.MOUSE_DOWN:
+
+                gsm.cursor.setPosition(event.x, event.y);
 
                 if (event.code == MouseEvent.BUTTON1) {
                     for (ButtonUI b : buttons) {
@@ -249,6 +252,8 @@ public abstract class MenuState extends GameState {
                 break;
             case MyInputEvent.MOUSE_UP:
 
+                gsm.cursor.setPosition(event.x, event.y);
+
                 if (event.code == MouseEvent.BUTTON1) {
                     if (currentSlider != null) {
                         currentSlider.snapSlider();
@@ -256,7 +261,8 @@ public abstract class MenuState extends GameState {
                         switch (currentSlider.name) {
                             case "sfx_volume":
                             case "music_volume":
-                                gsm.audioManager.setVolume(OutputManager.getSetting("sfx_volume"), OutputManager.getSetting("music_volume"));
+                                gsm.audioManager.setVolume(OutputManager.getSetting("sfx_volume"),
+                                        OutputManager.getSetting("music_volume"));
                                 break;
                             case "quality":
                                 window.setQuality(OutputManager.getSetting("quality") == 1);

@@ -40,18 +40,22 @@ public class Window {
             HEIGHT = (int) screenSize.getHeight();
         }
 
+        System.out.println("Loading window: OS=" + OS + " WIDTH=" + WIDTH + " HEIGHT=" + HEIGHT);
+
         SCALE = HEIGHT / 1080.0;
     }
 
-    Canvas canvas;
-
-    private BufferStrategy strategy;
-    private BufferedImage background;
-    private Graphics2D backgroundGraphics, graphics;
+    private Canvas canvas;
+    private BufferedImage backBuffer;
+    private Graphics2D graphics;
     private JFrame frame;
 
-    public Window(WindowAdapter _exitOperation) {
+    public Component getInputTarget() {
+        return canvas;
+    }
 
+    public Window(WindowAdapter _exitOperation) {
+        System.out.println("Creating window...");
 
         // JFrame
         frame = new JFrame("WarmVector");
@@ -61,9 +65,21 @@ public class Window {
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setResizable(false);
         frame.setUndecorated(true);
+
+        // Canvas
+        canvas = new Canvas(GraphicsEnvironment.getLocalGraphicsEnvironment()
+                .getDefaultScreenDevice()
+                .getDefaultConfiguration());
+        canvas.setSize(WIDTH, HEIGHT);
+
+        // NOTE: in a previous version of this code, idk why we did:
+        // `canvas.createBufferStrategy(2)` and then `canvas.getBufferStrategy()`,
+
+        // Add canvas before making frame visible
+        frame.add(canvas, 0);
         frame.setVisible(true);
 
-        // Fullscreen
+        // Fullscreen handling
         if (device.isFullScreenSupported() && !OS.equals("Linux")) {
             try {
                 device.setFullScreenWindow(frame);
@@ -72,82 +88,83 @@ public class Window {
             }
         }
 
-        //Set default mouse cursor to transparent
+        // Set default mouse cursor to transparent
         Cursor transparentCursor = Toolkit.getDefaultToolkit().createCustomCursor(
                 Toolkit.getDefaultToolkit().createImage(
-                        new MemoryImageSource(16, 16, new int[16 * 16], 0, 16)), new Point(0, 0), "invisibleCursor");
+                        new MemoryImageSource(16, 16, new int[16 * 16], 0, 16)),
+                new Point(0, 0), "invisibleCursor");
         frame.setCursor(transparentCursor);
 
-        // Canvas
-        canvas = new Canvas(GraphicsEnvironment.getLocalGraphicsEnvironment()
-                .getDefaultScreenDevice()
-                .getDefaultConfiguration());
-        canvas.setSize(WIDTH, HEIGHT);
-        frame.add(canvas, 0);
+        canvas.setVisible(true);
 
-        // Background & Buffer
-        background = ImageUtils.getCompatableVersion(new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB));
-        canvas.createBufferStrategy(2);
-        do {
-            strategy = canvas.getBufferStrategy();
-        } while (strategy == null);
+        // Create back buffer
+        backBuffer = ImageUtils.getCompatableVersion(new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB));
 
-        backgroundGraphics = (Graphics2D) background.getGraphics();
-
-        setQuality(OutputManager.getSetting("quality") == 1);
-    }
-
-    // Screen and buffer stuff
-    private Graphics2D getBuffer() {
+        graphics = (Graphics2D) backBuffer.getGraphics();
         if (graphics == null) {
-            try {
-                graphics = (Graphics2D) strategy.getDrawGraphics();
-            } catch (IllegalStateException e) {
-                return null;
-            }
+            OutputManager.fatalAlert("Failed to create graphics context.");
         }
-        return graphics;
+
+        // Set rendering hints
+        graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                OutputManager.getSetting("quality") == 1 ? RenderingHints.VALUE_TEXT_ANTIALIAS_ON
+                        : RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+
+        System.out.println("Graphics initialized.");
     }
 
-    private boolean updateScreen() {
-        graphics.dispose();
-        graphics = null;
-        try {
-            strategy.show();
-            Toolkit.getDefaultToolkit().sync();
-            return (!strategy.contentsLost());
+    // private boolean updateScreen() {
+    // graphics.dispose();
+    // graphics = null;
+    // try {
+    // strategy.show();
+    // Toolkit.getDefaultToolkit().sync();
+    // return (!strategy.contentsLost());
 
-        } catch (NullPointerException | IllegalStateException e) {
-            return true;
+    // } catch (NullPointerException | IllegalStateException e) {
+    // return true;
 
-        }
-    }
+    // }
 
     public void render(GameStateManager gsm) {
-        // Update Graphics
-        do {
-            Graphics2D bg = getBuffer();
-            assert bg != null;
 
-            backgroundGraphics.setColor(Color.BLACK);
-            backgroundGraphics.fillRect(0, 0, WIDTH, HEIGHT);
+        // Clear background
+        graphics.setColor(Color.BLACK);
+        graphics.fillRect(0, 0, WIDTH, HEIGHT);
+        // System.out.println("Cleared background");
 
-            // TODO: this is weird way of calling draw
-            gsm.draw(backgroundGraphics);
+        gsm.draw(graphics);
 
-            bg.drawImage(background, 0, 0, null);
-            bg.dispose();
+        // Draw to screen
+        Graphics2D g = (Graphics2D) canvas.getGraphics();
+        if (g == null) {
+            System.out.println("WARNING: Could not get canvas graphics for rendering");
+            return;
+        }
 
-        } while (!updateScreen());
+        // System.out.println("Got canvas graphics, drawing to screen...");
+        g.drawImage(backBuffer, 0, 0, null);
+        g.dispose();
+        canvas.repaint();
+        frame.repaint();
+        // System.out.println("Frame rendered successfully");
+
+        // Force a small delay to ensure steady frame rate and reduce CPU usage
+        // try {
+        // Thread.sleep(16); // Approximately 60 FPS
+        // } catch (InterruptedException e) {
+        // Thread.currentThread().interrupt();
+        // }
+
     }
 
     public void exit() {
+        graphics.dispose();
         frame.dispose();
     }
 
-
     public void setQuality(boolean better) {
-        backgroundGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+        graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                 better ? RenderingHints.VALUE_TEXT_ANTIALIAS_ON : RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
     }
 }

@@ -1,17 +1,14 @@
 package GameState;
 
-
 import Main.Window;
 import UI.MouseCursor;
 import UI.Sprite;
 import Util.MyInputEvent;
-import javafx.scene.media.Media;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-
 
 /**
  * Directory: WarmVector_Client_Singleplayer/${PACKAGE_NAME}/
@@ -26,26 +23,27 @@ public class IntroState extends GameState {
     }
 
     public void load() {
-        gsm.assetManager.loadAssets(new String[]{"start_menu.mp3", "intro_", "cursor.png", "crosshair.png"});
+        gsm.assetManager.loadAssets(new String[] { "start_menu.mp3", "intro_", "cursor.png", "crosshair.png" });
     }
 
     public void init() {
         gsm.cursor = new MouseCursor(gsm);
 
-        intro = new Sprite(Window.WIDTH * 0.5, Window.HEIGHT * 0.5, 0, 40, false, (BufferedImage[])gsm.assetManager.getAsset("intro_"));
+        intro = new Sprite(Window.WIDTH * 0.5, Window.HEIGHT * 0.5, 0, 40, false,
+                (BufferedImage[]) gsm.assetManager.getAsset("intro_"));
         intro.setDimensions(Window.WIDTH, Window.HEIGHT);
 
-        gsm.audioManager.playSong((Media)gsm.assetManager.getAsset("start_menu.mp3"), "start_menu.mp3");
+        gsm.audioManager.playSong("start_menu.mp3");
     }
 
-    public void unload() {}
+    public void unload() {
+    }
 
     public void draw(Graphics2D g) {
         intro.draw(g);
     }
 
     public void update(double deltaTime) {
-
         intro.step();
 
         if (!intro.state) {

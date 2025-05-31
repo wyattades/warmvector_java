@@ -2,6 +2,7 @@ package UI;
 
 import GameState.GameStateManager;
 import Main.Window;
+import Main.Main;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -29,11 +30,14 @@ public class MouseCursor {
         w = sprite.getWidth();
         h = sprite.getHeight();
 
-        try {
-            robot = new Robot();
-        } catch (AWTException e) {
-            e.printStackTrace();
-            System.exit(1);
+
+        if (!Main.CHEERPJ) {
+            try {
+                robot = new Robot();
+            } catch (AWTException e) {
+                System.out.println("Error: Failed to create mouse Robot: " + e.toString());
+                System.exit(1);
+            }
         }
 
     }
@@ -56,12 +60,14 @@ public class MouseCursor {
     }
 
     public void setPosition(int new_x, int new_y) {
-        x = constrain(new_x, 0, Main.Window.WIDTH);
+        x = constrain(new_x, 0, Window.WIDTH);
         y = constrain(new_y, 0, Window.HEIGHT);
     }
 
     public void setMouse(int x, int y) {
-        robot.mouseMove(x, y);
+        if (!Main.CHEERPJ) {
+            robot.mouseMove(x, y);
+        }
         setPosition(x, y);
     }
 
@@ -75,7 +81,9 @@ public class MouseCursor {
     }
 
     public void loadOldPos() {
-        robot.mouseMove(oldX, oldY);
+        if (!Main.CHEERPJ) {
+            robot.mouseMove(oldX, oldY);
+        }
         x = oldX;
         y = oldY;
     }

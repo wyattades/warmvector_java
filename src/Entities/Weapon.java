@@ -3,7 +3,6 @@ package Entities;
 import GameState.GameStateManager;
 import Util.MyMath;
 import Util.StringUtil;
-import javafx.scene.media.AudioClip;
 
 import java.awt.image.BufferedImage;
 
@@ -18,8 +17,8 @@ public abstract class Weapon extends Entity implements Cloneable {
 
     public int ammo, reserveAmmo;
 
-    private AudioClip shootSound;
-    public AudioClip hitSound;
+    private String shootSound;
+    public String hitSound;
 
     public final int clipSize, amountPerShot, damage, rate;
     public final String name, bulletImage;
@@ -33,37 +32,43 @@ public abstract class Weapon extends Entity implements Cloneable {
 
     public static class LMG extends Weapon {
         public LMG(GameStateManager _gsm) {
-            super(_gsm, "LMG", 84, 168, 1, 50, 9, 0.12, 15.0, 0.0, 15.0, StringUtil.randomAsset("ric%d.wav", 2), "bullet.png");
+            super(_gsm, "LMG", 84, 168, 1, 50, 9, 0.12, 15.0, 0.0, 15.0, StringUtil.randomAsset("ric%d.wav", 2),
+                    "bullet.png");
         }
     }
 
     public static class Pistol extends Weapon {
         public Pistol(GameStateManager _gsm) {
-            super(_gsm, "Pistol", 12, 32, 1, 280, 10, 0.05, 15.0, 0.0, 15.0, StringUtil.randomAsset("ric%d.wav", 2), "bullet.png");
+            super(_gsm, "Pistol", 12, 32, 1, 280, 10, 0.05, 15.0, 0.0, 15.0, StringUtil.randomAsset("ric%d.wav", 2),
+                    "bullet.png");
         }
     }
 
     public static class Rifle extends Weapon {
         public Rifle(GameStateManager _gsm) {
-            super(_gsm, "Rifle", 32, 64, 1, 100, 15, 0.05, 19.0, 0.0, 22.0, StringUtil.randomAsset("ric%d.wav", 2), "bullet.png");
+            super(_gsm, "Rifle", 32, 64, 1, 100, 15, 0.05, 19.0, 0.0, 22.0, StringUtil.randomAsset("ric%d.wav", 2),
+                    "bullet.png");
         }
     }
 
     public static class Shotgun extends Weapon {
         public Shotgun(GameStateManager _gsm) {
-            super(_gsm, "Shotgun", 6, 18, 6, 1100, 13, 0.35, 16.0, 0.0, 18.0, StringUtil.randomAsset("ric%d.wav", 2), "bullet.png");
+            super(_gsm, "Shotgun", 6, 18, 6, 1100, 13, 0.35, 16.0, 0.0, 18.0, StringUtil.randomAsset("ric%d.wav", 2),
+                    "bullet.png");
         }
     }
 
     public static class Sniper extends Weapon {
         public Sniper(GameStateManager _gsm) {
-            super(_gsm, "Sniper", 10, 20, 1, 1000, 50, 0.01, 22.0, 0.0, 30.0, StringUtil.randomAsset("ric%d.wav", 2), "bullet.png");
+            super(_gsm, "Sniper", 10, 20, 1, 1000, 50, 0.01, 22.0, 0.0, 30.0, StringUtil.randomAsset("ric%d.wav", 2),
+                    "bullet.png");
         }
     }
 
-    protected Weapon(GameStateManager _gsm, String _name, int _clipSize, int _reserveAmmo, int _amountPerShot, int _rate,
-                     int _damage, double _spread, double _i_speed, double _accel, double _explodeRadius,
-                     String _hitSound, String _bulletImage) {
+    protected Weapon(GameStateManager _gsm, String _name, int _clipSize, int _reserveAmmo, int _amountPerShot,
+            int _rate,
+            int _damage, double _spread, double _i_speed, double _accel, double _explodeRadius,
+            String _hitSound, String _bulletImage) {
 
         super(_gsm, 0, 0, MyMath.random(0.0, MyMath.TWO_PI));
 
@@ -80,12 +85,10 @@ public abstract class Weapon extends Entity implements Cloneable {
 
         bulletImage = _bulletImage;
 
-//        hitSound = (AudioClip)gsm.assetManager.getAsset(_hitSound);
-        hitSound = gsm.assetManager.getSFX(_hitSound);
-//        shootSound = (AudioClip)gsm.assetManager.getAsset("shoot_" + name + ".wav");
-        shootSound = gsm.assetManager.getSFX("shoot_" + name + ".wav");
+        hitSound = _hitSound;
+        shootSound = "shoot_" + name + ".wav";
 
-        sprite = (BufferedImage)gsm.assetManager.getAsset("gun_" + name + ".png");
+        sprite = (BufferedImage) gsm.assetManager.getAsset("gun_" + name + ".png");
         setBounds(sprite.getWidth(), sprite.getWidth());
 
     }
@@ -122,13 +125,13 @@ public abstract class Weapon extends Entity implements Cloneable {
 
     public void shoot() {
         gsm.audioManager.playSFX(shootSound);
-//        gsm.audioManager.playSFX("shoot_Rifle.wav");
         changeAmmo(-1);
     }
 
     private void changeAmmo(int amount) {
         ammo += amount;
-        if (ammo < 0) ammo = 0;
+        if (ammo < 0)
+            ammo = 0;
     }
 
 }

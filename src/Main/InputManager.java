@@ -12,64 +12,53 @@ import java.util.concurrent.BlockingQueue;
  * Directory: WarmVector_Client_Singleplayer/${PACKAGE_NAME}/
  * Created by Wyatt on 12/29/2014.
  */
-class InputManager implements MouseListener, KeyListener, MouseMotionListener {
+class InputManager {
 
     private BlockingQueue<MyInputEvent> eventQueue;
     private static final int QUEUE_SIZE = 16;
 
-    InputManager(Canvas canvas) {
-        canvas.addMouseListener(this);
-        canvas.addKeyListener(this);
-        canvas.addMouseMotionListener(this);
+    InputManager(Component listenTarget) {
+        listenTarget.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                newEvent(new MyInputEvent(MyInputEvent.MOUSE_DOWN, e.getX(), e.getY(), e.getButton()));
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                newEvent(new MyInputEvent(MyInputEvent.MOUSE_UP, e.getX(), e.getY(), e.getButton()));
+            }
+        });
+        listenTarget.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                newEvent(new MyInputEvent(MyInputEvent.KEY_DOWN, e.getKeyCode()));
+            }
+        });
+        listenTarget.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                newEvent(new MyInputEvent(MyInputEvent.MOUSE_MOVE, e.getX(), e.getY()));
+            }
+        });
 
         eventQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
     }
-    
+
     ArrayList<MyInputEvent> getEvents() {
+        // System.out.println("debug getEvents: " + eventQueue.size());
         ArrayList<MyInputEvent> events = new ArrayList<>();
         eventQueue.drainTo(events);
         return events;
     }
 
     private void newEvent(MyInputEvent e) {
+        // System.out.println("debug newEvent: " + e.type + " - " + e.x + ", " + e.y + "
+        // - " + e.code);
         try {
-           eventQueue.add(e);
-        } catch(Exception exception) {
-            System.err.println("BlockingQueue Exception: queue has overflowed");
+            eventQueue.add(e);
+        } catch (Exception exception) {
+            System.err.println("BlockingQueue Exception: queue has overflowed: " + exception.toString());
         }
     }
-
-    public void mouseMoved(MouseEvent e) {
-        newEvent(new MyInputEvent(MyInputEvent.MOUSE_MOVE, e.getX(), e.getY()));
-    }
-
-    public synchronized void mousePressed(MouseEvent e) {
-        newEvent(new MyInputEvent(MyInputEvent.MOUSE_DOWN, e.getButton()));
-    }
-
-    public synchronized void mouseReleased(MouseEvent e) {
-        newEvent(new MyInputEvent(MyInputEvent.MOUSE_UP, e.getButton()));
-    }
-
-    public synchronized void keyPressed(KeyEvent e) {
-        newEvent(new MyInputEvent(MyInputEvent.KEY_DOWN, e.getKeyCode()));
-    }
-
-    public synchronized void keyReleased(KeyEvent e) {
-        newEvent(new MyInputEvent(MyInputEvent.KEY_UP, e.getKeyCode()));
-    }
-
-    public synchronized void mouseDragged(MouseEvent e) {
-        newEvent(new MyInputEvent(MyInputEvent.MOUSE_MOVE, e.getX(), e.getY()));
-    }
-
-    public void keyTyped(KeyEvent e) {}
-
-    public void mouseClicked(MouseEvent e) {}
-
-    public void mouseEntered(MouseEvent e) {}
-
-    public void mouseExited(MouseEvent e) {}
-
-
 }
