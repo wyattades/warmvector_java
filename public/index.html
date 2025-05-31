@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CheerpJ test</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+      }
+      /* .cheerpjNC:before {
+        display: none;
+      } */
+
+      #container {
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+    <script src="https://cjrtnc.leaningtech.com/4.1/loader.js"></script>
+  </head>
+  <body>
+    <div id="container"></div>
+
+    <script>
+      (async function () {
+        // docs: https://cheerpj.com/docs/reference/cheerpjInit
+        await cheerpjInit({
+          version: 11,
+          enableDebug: true,
+          status: "default",
+          // run `cjGetRuntimeResources()` after load to get this, it just speeds up initial load.
+          // preloadResources: {
+          //   "/lt/11/lib/modules": [
+          //     0, 131072, 1441792, 4063232, 4194304, 4718592, 4849664, 5636096,
+          //     5767168, 6160384, 6291456, 6553600, 6684672, 6946816, 7602176,
+          //     7733248, 9306112, 9437184, 9568256, 9961472, 18481152, 18612224,
+          //     19398656, 20054016, 20185088, 22806528, 22937600, 23068672,
+          //     23199744, 23592960, 24641536, 25034752, 25559040, 26214400,
+          //     26345472, 27131904, 27262976, 27394048, 41156608, 41287680,
+          //     43253760, 43384832,
+          //   ],
+          //   "/lt/etc/users": [0, 131072],
+          //   "/lt/etc/localtime": [],
+          //   "/lt/11/jre/lib/cheerpj-handlers.jar": [0, 131072],
+          //   "/lt/11/jre/lib/cheerpj-awt.jar": [0, 131072],
+          //   "/lt/11/jre/lib/cheerpj-jsobject.jar": [0, 131072],
+          //   "/lt/etc/timezone": [],
+          //   "/lt/11/lib/tzdb.dat": [0, 131072],
+          //   "/lt/11/conf/security/java.security": [0, 131072],
+          //   "/lt/11/conf/accessibility.properties": [],
+          //   "/lt/11/conf/swing.properties": [],
+          //   "/lt/11/lib/fonts/badfonts.txt": [],
+          //   "/lt/11/lib/fonts": [],
+          //   "/lt/11/lib/fonts/fallback": [],
+          //   "/lt/fc/fonts/fonts.conf": [0, 131072],
+          //   "/lt/fc/ttf": [],
+          //   "/lt/fc/cache/e21edda6a7db77f35ca341e0c3cb2a22-le32d8.cache-7": [
+          //     0, 131072,
+          //   ],
+          //   "/lt/fc/ttf/LiberationSans-Bold.ttf": [0, 131072, 262144, 393216],
+          //   "/lt/11/conf/sound.properties": [0, 131072],
+          // },
+        });
+
+        // Create display first
+        cheerpjCreateDisplay(-1, -1, document.getElementById("container"));
+
+        // Run the main class
+        await cheerpjRunMain("Main.Main", "/app/jar/binary.jar");
+      })();
+    </script>
+  </body>
+</html>

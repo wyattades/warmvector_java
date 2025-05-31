@@ -2,7 +2,6 @@
 .idea/
 out/
 *.iml
-WarmVector_Client_Singleplayer.jar
 
 #################
 ## Eclipse
@@ -220,3 +219,7 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+# custom
+/public/jar
+node_modules/

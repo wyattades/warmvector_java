@@ -1,0 +1,25 @@
+{
+  "private": true,
+  "scripts": {
+    "dev:server": "http-server -p 3000 ./public -a localhost",
+    "dev": "nodemon --exec \"npm run build && npm run dev:server\"",
+    "build": "./build.sh",
+    "run-native": "cd public/jar && java -jar binary.jar"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "nodemon": "^3.1.10"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src",
+      "public"
+    ],
+    "ignore": [
+      "public/jar"
+    ],
+    "ext": "java,html,css,js,json,sh",
+    "delay": 1000
+  },
+  "packageManager": "pnpm@9.15.3"
+}
