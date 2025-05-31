@@ -21,22 +21,22 @@ public class GameStateManager {
     public MouseCursor cursor;
 
     public static final int
-        // States
-        INTRO = 0,
-        MAINMENU = 1,
-        PLAY = 2,
-        NEXTLEVEL = 3,
-        FADEIN = 4,
-        PAUSE = 5,
-        FADEOUT = 6,
+    // States
+    INTRO = 0,
+            MAINMENU = 1,
+            PLAY = 2,
+            NEXTLEVEL = 3,
+            FADEIN = 4,
+            PAUSE = 5,
+            FADEOUT = 6,
 
-        // Layers
-        MAIN = 0,
-        TOP = 1,
-        LOADING = 2,
+            // Layers
+            MAIN = 0,
+            TOP = 1,
+            LOADING = 2,
 
-        LAYERS = 3;
-    
+            LAYERS = 3;
+
     private GameState[] layers;
 
     public AssetManager assetManager;
@@ -47,7 +47,7 @@ public class GameStateManager {
     public boolean running;
 
     public GameStateManager(AssetManager _assetManager, AudioManager _audioManager,
-                            GraphicsManager _graphicsManager, Window _window) {
+            GraphicsManager _graphicsManager, Window _window) {
         assetManager = _assetManager;
         audioManager = _audioManager;
         graphicsManager = _graphicsManager;
@@ -90,7 +90,8 @@ public class GameStateManager {
         layers[layer].load();
 
         if (layer == TOP) {
-            while(!assetManager.isAvailable());
+            while (!assetManager.isAvailable())
+                ;
             layers[TOP].init();
         } else {
             if (assetManager.isAvailable()) {
@@ -104,21 +105,24 @@ public class GameStateManager {
     }
 
     public void setState(int state, int layer) {
-        if (layers[layer] != null) unloadState(layer);
+        if (layers[layer] != null)
+            unloadState(layer);
         initState(state, layer);
     }
-
 
     public void unloadState(int layer) {
         layers[layer].unload();
 
-        while(!assetManager.isAvailable());
+        while (!assetManager.isAvailable())
+            ;
 
         layers[layer] = null;
     }
 
-
     public void inputHandle(ArrayList<MyInputEvent> events) {
+        if (events.isEmpty()) {
+            return;
+        }
         for (MyInputEvent event : events) {
             if (layers[LOADING] == null) {
                 if (layers[TOP] != null) {

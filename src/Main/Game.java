@@ -9,6 +9,8 @@ import GameState.GameStateManager;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import Util.MyInputEvent;
 
 public class Game {
 
@@ -22,7 +24,6 @@ public class Game {
     private GameStateManager gsm;
 
     Game(AudioManager _audioManager, GraphicsManager _graphicsManager, AssetManager _assetManager) {
-
         assetManager = _assetManager;
         audioManager = _audioManager;
         graphicsManager = _graphicsManager;
@@ -42,66 +43,61 @@ public class Game {
         // Create a manager for handling the different game states e.g. intro, play,
         // gameOver
         gsm = new GameStateManager(assetManager, audioManager, graphicsManager, window);
-
     }
 
-    public void run() {
+    private final int MS_PER_UPDATE = 16;
 
-        double previous = System.currentTimeMillis();
-        double lag = 0.0;
-        final double MS_PER_UPDATE = 16;
+    public void run() {
+        long previous = System.currentTimeMillis();
+        long lag = 0;
+        int frameCount = 0;
+        long lastCheck = System.currentTimeMillis();
 
         while (gsm.running) {
-            double current = System.currentTimeMillis();
-            double elapsed = current - previous;
+            long current = System.currentTimeMillis();
+            long elapsed = current - previous;
             previous = current;
             lag += elapsed;
 
             // UPDATE
-            if (lag >= MS_PER_UPDATE) {
-                gsm.update(elapsed / MS_PER_UPDATE);
-
+            while (lag >= MS_PER_UPDATE) {
+                // Process input events
                 gsm.inputHandle(inputManager.getEvents());
 
+                gsm.update(elapsed / MS_PER_UPDATE);
                 lag -= MS_PER_UPDATE;
             }
 
             // RENDER
             window.render(gsm);
 
-            // Thread.yield();
+            frameCount++;
+
+            // Print FPS every second
+            if (Main.DEBUG) {
+                if (current - lastCheck >= 1000) {
+                    System.out.println("FPS: " + frameCount);
+                    frameCount = 0;
+                    lastCheck = current;
+                }
+            }
+
+            // Small yield to prevent excessive CPU usage
+            if (Main.CHEERPJ) {
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    System.out.println("Interrupted while sleeping");
+                }
+            }
         }
 
-        // int FPS = 60;
-        // long fpsWait = (long) (1000 / FPS);
-        // long renderTime = 0;
-        // while (gsm.running) {
-        //
-        // long renderStart = System.nanoTime();
-        //
-        // // UPDATE
-        // gsm.update(renderTime);
-        //
-        // // RENDER
-        // window.render(gsm);
-        //
-        // // fps limiting
-        // renderTime = (System.nanoTime() - renderStart) / 1000000;
-        // try {
-        // Thread.sleep(Math.max(0, fpsWait - renderTime));
-        // } catch (InterruptedException e) {
-        // Thread.interrupted();
-        // break;
-        // }
-        // renderTime = (System.nanoTime() - renderStart) / 1000000;
-        // }
-
         exit();
-
     }
 
     private void exit() {
-
+        inputManager.deactivate();
         audioManager.stop();
         graphicsManager.stop();
         assetManager.stop();
@@ -113,7 +109,6 @@ public class Game {
         System.out.println("--- LOG END at " + OutputManager.currentTime() + " ---");
 
         System.exit(0);
-
     }
 
     public static int currentTimeMillis() {
@@ -123,5 +118,4 @@ public class Game {
         }
         return (int) millisLong;
     }
-
 }
