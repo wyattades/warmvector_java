@@ -5,24 +5,13 @@ package Main;
  * Created by Wyatt on 12/29/2014.
  */
 public class Main {
-    public static boolean CHEERPJ = true; // TODO: test this
-
-    public static boolean DEBUG = false;
-    static {
-        try {
-            String prop = System.getProperty("warmvector-debug");
-            if (prop != null && prop.equals("true"))
-                DEBUG = true;
-        } catch (Exception e) {
-        }
-
-        try {
-            String prop = System.getProperty("cheerpj");
-            if (prop != null && prop.equals("true"))
-                CHEERPJ = true;
-        } catch (Exception e) {
-        }
+    private static boolean getBooleanProperty(String prop) {
+        String value = System.getProperty(prop);
+        return value != null && value.equals("true");
     }
+
+    public static boolean CHEERPJ = getBooleanProperty("warmvector-cheerpj"); // TODO: test this
+    public static boolean DEBUG = getBooleanProperty("warmvector-debug");
 
     public static void main(String[] args) {
         // System.setProperty("sun.java2d.opengl","True");

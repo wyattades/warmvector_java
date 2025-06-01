@@ -27,9 +27,14 @@
       (async function () {
         // docs: https://cheerpj.com/docs/reference/cheerpjInit
         await cheerpjInit({
-          version: 11,
+          version: 8,
           enableDebug: true,
           status: "default",
+          javaProperties: [
+            //
+            "warmvector-cheerpj=true",
+            "warmvector-debug=true",
+          ],
           // run `cjGetRuntimeResources()` after load to get this, it just speeds up initial load.
           // preloadResources: {
           //   "/lt/11/lib/modules": [
@@ -68,7 +73,14 @@
         cheerpjCreateDisplay(-1, -1, document.getElementById("container"));
 
         // Run the main class
-        await cheerpjRunMain("Main.Main", "/app/jar/binary.jar");
+        const runResult = await cheerpjRunMain(
+          "Main.Main",
+          "/app/jar/binary.jar"
+        );
+
+        document.getElementById(
+          "container"
+        ).innerHTML = `<p>EXIT RESULT: ${JSON.stringify(runResult)}</p>`;
       })();
     </script>
   </body>

@@ -191,16 +191,19 @@ public class AssetManager {
 
     public static Clip loadShortAudio(String name) {
         File file = resolveFile("resources/Audio/" + name);
+
         try {
             AudioInputStream audioIn = AudioSystem.getAudioInputStream(file);
             Clip clip = AudioSystem.getClip();
+            // this fails in CheerpJ v4.1 for Java 11
             clip.open(audioIn);
             return clip;
         } catch (Exception e) {
-            e.printStackTrace();
-            OutputManager.fatalAlert("Error: Failed to load Clip: " + name);
+            System.err.println("Error: Failed to load Clip " + name + ": " + e.toString());
+            System.out.println("AudioSystem.getMixerInfo(): " + Arrays.toString(AudioSystem.getMixerInfo()));
+            System.exit(1);
+            return null;
         }
-        return null;
     }
 
     // TODO

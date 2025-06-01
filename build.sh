@@ -5,8 +5,8 @@ set -e
 # build the jar file into /public/jar/binary.jar
 # also, copy the `resources/` directory into /public/jar/resources/
 
-echo "Java version (should be 11):"
-java --version
+echo "Java version:"
+java -version
 
 # Clean previous build
 rm -rf public/jar

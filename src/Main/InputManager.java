@@ -7,7 +7,6 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Directory: WarmVector_Client_Singleplayer/${PACKAGE_NAME}/
@@ -15,56 +14,69 @@ import java.util.concurrent.TimeUnit;
  */
 class InputManager {
 
-    private BlockingQueue<MyInputEvent> eventQueue;
-    private static final int QUEUE_SIZE = 256; // Increased queue size
+    private final BlockingQueue<MyInputEvent> eventQueue;
+    private static final int QUEUE_SIZE = 256;
     private volatile boolean isActive = true;
+    private final Component listenTarget;
+
+    // Store references to listeners so we can remove them
+    private final MouseAdapter mouseAdapter;
+    private final MouseMotionAdapter motionAdapter;
+    private final KeyAdapter keyAdapter;
 
     InputManager(Component listenTarget) {
+        this.listenTarget = listenTarget;
         eventQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
 
-        listenTarget.addMouseListener(new MouseAdapter() {
+        mouseAdapter = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (isActive) {
-                    newEvent(new MyInputEvent(MyInputEvent.MOUSE_DOWN, e.getX(), e.getY(), e.getButton()));
-                }
+                // System.out.println("mousePressed event: " + e);
+                newEvent(new MyInputEvent(MyInputEvent.MOUSE_DOWN, e.getX(), e.getY(),
+                        e.getButton()));
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (isActive) {
-                    newEvent(new MyInputEvent(MyInputEvent.MOUSE_UP, e.getX(), e.getY(), e.getButton()));
-                }
+                // System.out.println("mouseReleased event: " + e);
+                newEvent(new MyInputEvent(MyInputEvent.MOUSE_UP, e.getX(), e.getY(),
+                        e.getButton()));
             }
-        });
+        };
 
-        listenTarget.addMouseMotionListener(new MouseMotionAdapter() {
+        motionAdapter = new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                if (isActive) {
-                    newEvent(new MyInputEvent(MyInputEvent.MOUSE_MOVE, e.getX(), e.getY()));
-                }
+                // System.out.println("mouseMoved event: " + e);
+                newEvent(new MyInputEvent(MyInputEvent.MOUSE_MOVE, e.getX(), e.getY()));
             }
-        });
+        };
 
-        listenTarget.addKeyListener(new KeyAdapter() {
+        keyAdapter = new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                if (isActive) {
-                    newEvent(new MyInputEvent(MyInputEvent.KEY_DOWN, e.getKeyCode()));
-                }
+                // System.out.println("keyPressed event: " + e);
+                newEvent(new MyInputEvent(MyInputEvent.KEY_DOWN, e.getKeyCode()));
             }
-        });
+        };
+
+        listenTarget.addMouseListener(mouseAdapter);
+        listenTarget.addMouseMotionListener(motionAdapter);
+        listenTarget.addKeyListener(keyAdapter);
     }
 
     ArrayList<MyInputEvent> getEvents() {
-
-        // System.out.println("debug getEvents: " + eventQueue.size());
         ArrayList<MyInputEvent> events = new ArrayList<>();
         if (eventQueue.isEmpty()) {
             return events;
         }
+
         eventQueue.drainTo(events);
+
+        // if (Main.DEBUG && !events.isEmpty()) {
+        // System.out.println("Processing " + events.size() + " events");
+        // }
+
         return events;
     }
 
@@ -72,24 +84,26 @@ class InputManager {
         if (!isActive)
             return;
 
+        System.out.println("Adding event: " + e);
+
         try {
-            boolean added = eventQueue.offer(e, 100, TimeUnit.MILLISECONDS); // Use offer with timeout instead of add
-            if (!added) {
-                System.err.println("Failed to add event to queue: Queue full");
-            }
-        } catch (InterruptedException ie) {
-            Thread.currentThread().interrupt();
-            System.err.println("Interrupted while adding event to queue");
+            eventQueue.add(e);
         } catch (Exception exception) {
-            System.err.println("Error adding event to queue: " + exception.toString());
+            System.err.println("Error adding event to queue: " + exception);
             exception.printStackTrace();
+
         }
     }
 
     public void deactivate() {
+        if (Main.DEBUG)
+            System.out.println("Deactivating input manager...");
         isActive = false;
-        // listenTarget.removeMouseListener(TODO);
-        // listenTarget.removeMouseMotionListener(TODO);
-        // listenTarget.removeKeyListener(TODO);
+
+        // Remove all listeners
+        listenTarget.removeMouseListener(mouseAdapter);
+        listenTarget.removeMouseMotionListener(motionAdapter);
+        listenTarget.removeKeyListener(keyAdapter);
+
     }
 }
