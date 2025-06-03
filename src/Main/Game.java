@@ -64,7 +64,8 @@ public class Game {
                 // Process input events
                 gsm.inputHandle(inputManager.getEvents());
 
-                gsm.update(elapsed / MS_PER_UPDATE);
+                // gsm.update(elapsed / MS_PER_UPDATE);
+                gsm.update(0.8); // since this is a fixed update, the deltaTime should be constant
                 lag -= MS_PER_UPDATE;
             }
 
