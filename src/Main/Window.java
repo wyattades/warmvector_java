@@ -81,12 +81,17 @@ public class Window {
         // DrawingPanel (custom JPanel)
         drawingPanel = new DrawingPanel();
         drawingPanel.setPreferredSize(new Dimension(WIDTH, HEIGHT)); // Explicitly set preferred size
+        drawingPanel.setFocusable(true); // Ensure the panel can receive focus
         frame.getContentPane().add(drawingPanel, BorderLayout.CENTER);
 
         // Set frame size explicitly, then maximize, then visible
         frame.setSize(WIDTH, HEIGHT);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setVisible(true);
+
+        // Request focus for the drawing panel AFTER the frame is visible
+        boolean focusRequested = drawingPanel.requestFocusInWindow();
+        System.out.println("DrawingPanel focus requested in window: " + focusRequested);
 
         // Log panel size after frame is visible
         if (drawingPanel != null) {

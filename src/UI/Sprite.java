@@ -35,10 +35,10 @@ public class Sprite {
     }
 
     public void updatePos(double _x, double _y, double _orient) {
-        x = (int)_x;
-        y = (int)_y;
-        cornerX = -(int)(w * 0.5);
-        cornerY = -(int)(h * 0.5);
+        x = (int) _x;
+        y = (int) _y;
+        cornerX = -(int) (w * 0.5);
+        cornerY = -(int) (h * 0.5);
         orient = _orient;
     }
 

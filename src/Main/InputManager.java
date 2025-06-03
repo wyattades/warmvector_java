@@ -58,6 +58,12 @@ class InputManager {
                 // System.out.println("keyPressed event: " + e);
                 newEvent(new MyInputEvent(MyInputEvent.KEY_DOWN, e.getKeyCode()));
             }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                // System.out.println("keyReleased event: " + e);
+                newEvent(new MyInputEvent(MyInputEvent.KEY_UP, e.getKeyCode()));
+            }
         };
 
         listenTarget.addMouseListener(mouseAdapter);
