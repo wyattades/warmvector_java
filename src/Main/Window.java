@@ -6,7 +6,6 @@ import Util.ImageUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
-import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.MemoryImageSource;
 
@@ -17,148 +16,159 @@ import java.awt.image.MemoryImageSource;
 
 public class Window {
 
-    private static GraphicsDevice device;
     private static String OS;
 
     // Dimensions
     public static final int WIDTH;
     public static final int HEIGHT;
     public static final double SCALE;
+
     static {
         OS = System.getProperty("os.name");
-
-        // Dimensions
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        device = env.getDefaultScreenDevice();
-        if (!device.isFullScreenSupported() || OS.equals("Linux")) {
-            Rectangle winSize = env.getMaximumWindowBounds();
-            WIDTH = winSize.width;
-            HEIGHT = winSize.height;
-        } else {
-            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-            WIDTH = (int) screenSize.getWidth();
-            HEIGHT = (int) screenSize.getHeight();
-        }
+        // For maximized window, we can use maximum window bounds.
+        Rectangle winSize = env.getMaximumWindowBounds();
+        WIDTH = winSize.width;
+        HEIGHT = winSize.height;
 
-        System.out.println("Loading window: OS=" + OS + " WIDTH=" + WIDTH + " HEIGHT=" + HEIGHT);
-
-        SCALE = HEIGHT / 1080.0;
+        System.out.println("Window Init: OS=" + OS + ", WIDTH=" + WIDTH + ", HEIGHT=" + HEIGHT);
+        SCALE = HEIGHT / 1080.0; // TODO: why is this hardcoded?
     }
 
-    private Canvas canvas;
+    private DrawingPanel drawingPanel; // Changed from Canvas
     private BufferedImage backBuffer;
-    private Graphics2D graphics;
+    private Graphics2D backBufferGraphics; // Renamed for clarity from 'graphics'
     private JFrame frame;
 
+    // Inner class for custom drawing using JPanel
+    private class DrawingPanel extends JPanel {
+        public DrawingPanel() {
+            // Optimize JPanel for custom drawing
+            setOpaque(true);
+            // setIgnoreRepaint(true); // Temporarily commented out for debugging blank
+            // screen
+            setBackground(Color.BLACK); // Set a default background
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            return new Dimension(WIDTH, HEIGHT);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g); // Important for Swing's painting integrity
+            if (backBuffer != null) {
+                g.drawImage(backBuffer, 0, 0, this); // 'this' refers to the DrawingPanel
+            }
+        }
+    }
+
     public Component getInputTarget() {
-        return canvas;
+        return drawingPanel;
     }
 
     public Window(WindowAdapter exitOperation) {
-        System.out.println("Creating window...");
+        System.out.println("Creating window with JPanel...");
 
         // JFrame
         frame = new JFrame("WarmVector");
         frame.addWindowListener(exitOperation);
         frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        frame.setUndecorated(true); // For borderless window
+        frame.setResizable(false);
+
+        // DrawingPanel (custom JPanel)
+        drawingPanel = new DrawingPanel();
+        drawingPanel.setPreferredSize(new Dimension(WIDTH, HEIGHT)); // Explicitly set preferred size
+        frame.getContentPane().add(drawingPanel, BorderLayout.CENTER);
+
+        // Set frame size explicitly, then maximize, then visible
         frame.setSize(WIDTH, HEIGHT);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        frame.setResizable(false);
-        frame.setUndecorated(true);
-
-        // Canvas
-        canvas = new Canvas(GraphicsEnvironment.getLocalGraphicsEnvironment()
-                .getDefaultScreenDevice()
-                .getDefaultConfiguration());
-        canvas.setSize(WIDTH, HEIGHT);
-
-        // NOTE: in a previous version of this code, idk why we did:
-        // `canvas.createBufferStrategy(2)` and then `canvas.getBufferStrategy()`,
-
-        // Add canvas before making frame visible
-        frame.add(canvas, 0);
         frame.setVisible(true);
 
-        // Fullscreen handling
-        if (device.isFullScreenSupported() && !OS.equals("Linux")) {
-            try {
-                device.setFullScreenWindow(frame);
-            } finally {
-                device.setFullScreenWindow(null);
-            }
+        // Log panel size after frame is visible
+        if (drawingPanel != null) {
+            SwingUtilities.invokeLater(() -> { // Ensure we get size after EDT has processed layout
+                System.out.println("DrawingPanel size: "
+                        + drawingPanel.getWidth() + "x" + drawingPanel.getHeight());
+            });
+        } else {
+            System.out.println("DrawingPanel is null.");
         }
 
+        // Fullscreen logic simplified: Relies on undecorated + maximized_both
+        // The previous device.setFullScreenWindow() logic has been removed.
+
         // Set default mouse cursor to transparent
+        // Ensure this is done after frame is visible and has a peer
         Cursor transparentCursor = Toolkit.getDefaultToolkit().createCustomCursor(
                 Toolkit.getDefaultToolkit().createImage(
                         new MemoryImageSource(16, 16, new int[16 * 16], 0, 16)),
                 new Point(0, 0), "invisibleCursor");
         frame.setCursor(transparentCursor);
 
-        canvas.setVisible(true);
-
-        // Create back buffer
+        // Create back buffer based on panel's actual size if possible, or fixed size
+        // Using fixed WIDTH/HEIGHT as per original logic
         backBuffer = ImageUtils.getCompatableVersion(new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB));
+        backBufferGraphics = (Graphics2D) backBuffer.getGraphics();
 
-        graphics = (Graphics2D) backBuffer.getGraphics();
-        if (graphics == null) {
-            OutputManager.fatalAlert("Failed to create graphics context.");
-        }
-
-        // Set rendering hints
-        graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                OutputManager.getSetting("quality") == 1 ? RenderingHints.VALUE_TEXT_ANTIALIAS_ON
-                        : RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-
-        System.out.println("Graphics initialized.");
-    }
-
-    // private boolean updateScreen() {
-    // graphics.dispose();
-    // graphics = null;
-    // try {
-    // strategy.show();
-    // Toolkit.getDefaultToolkit().sync();
-    // return (!strategy.contentsLost());
-
-    // } catch (NullPointerException | IllegalStateException e) {
-    // return true;
-
-    // }
-
-    public void render(GameStateManager gsm) {
-
-        // Clear background
-        graphics.setColor(Color.BLACK);
-        graphics.fillRect(0, 0, WIDTH, HEIGHT);
-        // System.out.println("Cleared background");
-
-        gsm.draw(graphics);
-
-        // Draw to screen
-        Graphics2D g = (Graphics2D) canvas.getGraphics();
-        if (g == null) {
-            System.out.println("WARNING: Could not get canvas graphics for rendering");
+        if (backBufferGraphics == null) {
+            OutputManager.fatalAlert("Failed to create backBufferGraphics.");
+            // Consider throwing an exception here to halt initialization
             return;
         }
 
-        // System.out.println("Got canvas graphics, drawing to screen...");
-        g.drawImage(backBuffer, 0, 0, null);
-        g.dispose();
-        canvas.repaint();
-        // frame.repaint(); // this causes the AWT to be overwhelmed i think, preventing
-        // inputs from being captured
-        // System.out.println("Frame rendered successfully");
+        // Set rendering hints for the backBuffer's graphics context
+        setQuality(
+                OutputManager.getSetting("quality") == 1);
 
+        System.out.println("Window and backBuffer graphics initialized.");
+    }
+
+    public void render(GameStateManager gsm) {
+        if (backBufferGraphics == null)
+            return; // Safety check
+
+        // Clear backBuffer
+        backBufferGraphics.setColor(Color.BLACK);
+        backBufferGraphics.fillRect(0, 0, WIDTH, HEIGHT);
+
+        // Draw game state to backBuffer
+        gsm.draw(backBufferGraphics);
+
+        // Request the DrawingPanel to repaint itself (will call paintComponent)
+        if (drawingPanel != null) {
+            drawingPanel.repaint();
+        }
+
+        // Optional: Toolkit.getDefaultToolkit().sync();
+        // This can sometimes help ensure drawing is flushed, especially on Linux.
+        // Might be needed in CheerpJ if visual updates are laggy, but can also impact
+        // performance.
+        // Only use if necessary.
     }
 
     public void exit() {
-        graphics.dispose();
-        frame.dispose();
+        if (backBufferGraphics != null) {
+            backBufferGraphics.dispose();
+        }
+        if (frame != null) {
+            frame.dispose();
+        }
     }
 
-    public void setQuality(boolean better) {
-        graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                better ? RenderingHints.VALUE_TEXT_ANTIALIAS_ON : RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+    public void setQuality(boolean betterQuality) {
+        if (backBufferGraphics == null)
+            return;
+        backBufferGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                betterQuality ? RenderingHints.VALUE_TEXT_ANTIALIAS_ON
+                        : RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+        // Add other hints like KEY_ANTIALIASING, KEY_RENDERING if needed
+        // backBufferGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+        // RenderingHints.VALUE_ANTIALIAS_ON);
+        // backBufferGraphics.setRenderingHint(RenderingHints.KEY_RENDERING,
+        // RenderingHints.VALUE_RENDER_QUALITY);
     }
 }

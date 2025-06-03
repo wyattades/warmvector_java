@@ -84,13 +84,10 @@ class InputManager {
         if (!isActive)
             return;
 
-        System.out.println("Adding event: " + e);
-
         try {
             eventQueue.add(e);
         } catch (Exception exception) {
             System.err.println("Error adding event to queue: " + exception);
-            exception.printStackTrace();
 
         }
     }
