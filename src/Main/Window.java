@@ -146,7 +146,8 @@ public class Window {
         g.drawImage(backBuffer, 0, 0, null);
         g.dispose();
         canvas.repaint();
-        frame.repaint();
+        // frame.repaint(); // this causes the AWT to be overwhelmed i think, preventing
+        // inputs from being captured
         // System.out.println("Frame rendered successfully");
 
     }
