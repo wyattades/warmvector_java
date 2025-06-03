@@ -54,12 +54,12 @@ public class Window {
         return canvas;
     }
 
-    public Window(WindowAdapter _exitOperation) {
+    public Window(WindowAdapter exitOperation) {
         System.out.println("Creating window...");
 
         // JFrame
         frame = new JFrame("WarmVector");
-        frame.addWindowListener(_exitOperation);
+        frame.addWindowListener(exitOperation);
         frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         frame.setSize(WIDTH, HEIGHT);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -148,13 +148,6 @@ public class Window {
         canvas.repaint();
         frame.repaint();
         // System.out.println("Frame rendered successfully");
-
-        // Force a small delay to ensure steady frame rate and reduce CPU usage
-        // try {
-        // Thread.sleep(16); // Approximately 60 FPS
-        // } catch (InterruptedException e) {
-        // Thread.currentThread().interrupt();
-        // }
 
     }
 
