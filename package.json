@@ -4,11 +4,13 @@
     "dev:server": "http-server -p 3000 ./public -a localhost",
     "dev": "nodemon --exec \"npm run build && npm run dev:server\"",
     "build": "./build.sh",
-    "run-native": "cd public/jar && java -jar binary.jar"
+    "run-native": "cd public/jar && java -jar binary.jar",
+    "deploy": "vercel public --prod"
   },
   "devDependencies": {
     "http-server": "^14.1.1",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "vercel": "^42.3.0"
   },
   "nodemonConfig": {
     "watch": [
